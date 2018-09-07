@@ -56,6 +56,14 @@ class ElementalArea extends DataObject
     private static $table_name = 'ElementalArea';
 
     /**
+     * Cache various data to improve CMS load time
+     *
+     * @internal
+     * @var array
+     */
+    protected $cacheData = [];
+
+    /**
      * @return array
      */
     public function supportedPageTypes()
@@ -136,6 +144,11 @@ class ElementalArea extends DataObject
      */
     public function getOwnerPage()
     {
+        // Allow for repeated calls to read from cache
+        if (isset($this->cacheData['owner_page'])) {
+            return $this->cacheData['owner_page'];
+        }
+
         if ($this->OwnerClassName) {
             $class = $this->OwnerClassName;
             $instance = Injector::inst()->get($class);
@@ -150,8 +163,8 @@ class ElementalArea extends DataObject
                 $currentStage = Versioned::get_stage() ?: Versioned::DRAFT;
                 $page = Versioned::get_one_by_stage($class, $currentStage, "\"$areaID\" = {$this->ID}");
 
-
                 if ($page) {
+                    $this->cacheData['owner_page'] = $page;
                     return $page;
                 }
             }
@@ -174,6 +187,7 @@ class ElementalArea extends DataObject
                         $this->write();
                     }
 
+                    $this->cacheData['area_relation_name'] = $page;
                     return $page;
                 }
             }
