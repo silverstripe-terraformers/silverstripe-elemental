@@ -368,7 +368,7 @@ JS
      */
     public function getType()
     {
-        return _t(__CLASS__ . '.BlockType', 'Block');
+        return $this->i18n_singular_name();
     }
 
     /**
